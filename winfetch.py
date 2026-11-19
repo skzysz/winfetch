@@ -4,6 +4,7 @@ import psutil
 import socket
 import getpass
 import time
+import subprocess
 
 def get_system_info():
     user = getpass.getuser()
@@ -16,9 +17,17 @@ def get_system_info():
     hours = int(uptime_seconds // 3600)
     minutes = int((uptime_seconds % 3600) // 60)
     
-    cpu_brand = platform.processor()
-    if len(cpu_brand) > 40:
-        cpu_brand = cpu_brand[:40] + "..."
+    cpu_brand = "Unknown CPU"
+    try:
+        cmd = ['powershell', '-NoProfile', '-Command', '(Get-CimInstance Win32_Processor).Name']
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+        if result.returncode == 0 and result.stdout.strip():
+            cpu_brand = result.stdout.strip()
+    except Exception:
+        cpu_brand = platform.processor()
+    
+    if len(cpu_brand) > 45:
+        cpu_brand = cpu_brand[:45] + "..."
     
     ram = psutil.virtual_memory()
     ram_total = round(ram.total / (1024 ** 3), 1)
@@ -56,6 +65,16 @@ def get_system_info():
     except Exception:
         pass
 
+    gpu = "Unknown"
+    try:
+        cmd = ['powershell', '-NoProfile', '-Command', 'Get-CimInstance Win32_VideoController | Select-Object -ExpandProperty Name']
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=5)
+        if result.returncode == 0 and result.stdout.strip():
+            gpus = [line.strip() for line in result.stdout.strip().split('\n') if line.strip()]
+            gpu = ", ".join(gpus)
+    except Exception:
+        pass
+
     info = [
         ("", f"{user}@{hostname}"),
         ("", "─" * 25),
@@ -66,6 +85,7 @@ def get_system_info():
         ("Resolution", resolution),
         ("Theme", theme),
         ("CPU", cpu_brand),
+        ("GPU", gpu),
         ("Memory", f"{ram_used} GiB / {ram_total} GiB ({ram_percent}%)"),
         ("Disk (C:)", f"{disk_used} GiB / {disk_total} GiB ({disk_percent}%)"),
         ("Local IP", local_ip),

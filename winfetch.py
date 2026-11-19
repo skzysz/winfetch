@@ -9,44 +9,36 @@ def get_system_info():
     user = getpass.getuser()
     hostname = socket.gethostname()
     
-    # ОС
     os_name = f"{platform.system()} {platform.release()}"
     os_version = f"(Build {platform.version().split('.')[2]})" if '.' in platform.version() else ""
     
-    # Аптайм
     uptime_seconds = time.time() - psutil.boot_time()
     hours = int(uptime_seconds // 3600)
     minutes = int((uptime_seconds % 3600) // 60)
     
-    # CPU (Безопасный метод без внешних библиотек)
     cpu_brand = platform.processor()
-    # Обрезаем лишнее, если строка слишком длинная
     if len(cpu_brand) > 40:
         cpu_brand = cpu_brand[:40] + "..."
     
-    # Память
     ram = psutil.virtual_memory()
     ram_total = round(ram.total / (1024 ** 3), 1)
     ram_used = round(ram.used / (1024 ** 3), 1)
     ram_percent = ram.percent
 
-    # Диск C:
     disk = psutil.disk_usage('C:\\')
     disk_total = round(disk.total / (1024 ** 3), 1)
     disk_used = round(disk.used / (1024 ** 3), 1)
     disk_percent = disk.percent
 
-    # IP-адрес (с таймаутом, чтобы не висло, если нет сети)
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.settimeout(1.0) # Ждем максимум 1 секунду
+        s.settimeout(1.0)
         s.connect(("8.8.8.8", 80))
         local_ip = s.getsockname()[0]
         s.close()
     except Exception:
         local_ip = "127.0.0.1"
 
-    # Разрешение экрана
     try:
         import ctypes
         user32 = ctypes.windll.user32
@@ -54,8 +46,7 @@ def get_system_info():
     except:
         resolution = "Unknown"
 
-    # Тема (читаем аккуратно)
-    theme = "Dark" # По умолчанию ставим темную
+    theme = "Dark"
     try:
         import winreg
         key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize")
@@ -63,7 +54,7 @@ def get_system_info():
         theme = "Light" if theme_val == 1 else "Dark"
         winreg.CloseKey(key)
     except Exception:
-        pass # Если не получилось прочитать, оставляем "Dark"
+        pass
 
     info = [
         ("", f"{user}@{hostname}"),
@@ -92,10 +83,9 @@ def get_accent_color_ansi():
         r = color_val & 0xFF
         return f"\033[38;2;{r};{g};{b}m"
     except Exception:
-        return "\033[94m" # Синий по умолчанию
+        return "\033[94m"
 
 def print_fetch():
-    # Твой логотип
     logo = [
         ".----------------.",
         "|          _       |",

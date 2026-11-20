@@ -5,6 +5,7 @@ import socket
 import getpass
 import time
 import subprocess
+import sys
 
 def get_system_info():
     user = getpass.getuser()
@@ -146,3 +147,17 @@ def print_fetch():
 
 if __name__ == "__main__":
     print_fetch()
+    
+    if getattr(sys, 'frozen', False):
+        base_path = sys._MEIPASS
+    else:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    
+    ps1_path = os.path.join(base_path, "winfetch.ps1")
+    
+    if os.path.exists(ps1_path):
+        print()
+        subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-File", ps1_path])
+    else:
+        print("\n[!] winfetch.ps1 не найден.")
+        input("Нажми Enter для выхода...")

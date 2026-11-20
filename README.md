@@ -32,13 +32,6 @@ Python-скрипт сам вызывает PowerShell-скрипт, поэто�
 pip install psutil pyinstaller
 ```
 
-Если вы планируете выкладывать проект на GitHub, создайте файл `requirements.txt`:
-
-```
-psutil>=5.9.0
-pyinstaller>=6.0.0
-```
-
 ## Запуск из исходного кода
 
 Просто запустите Python-скрипт:
